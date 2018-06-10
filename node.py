@@ -37,11 +37,10 @@ class Node(object):
             f = open(fullname, 'rb')
             md5 = hashlib.md5(f.read()).hexdigest()
             f.close()
-            if not self.dao.init_record_to_db(fullname, md5, os.path.getsize(fullname)):
-                resl.append(fullname)
+            rel_name = fullname[len(self.incoming):]
+            if not self.dao.init_record_to_db(rel_name, md5, os.path.getsize(fullname)):
+                resl.append(rel_name)
         return resl
-
-    def
 
 
 
