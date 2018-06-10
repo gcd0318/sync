@@ -5,13 +5,14 @@ from config import root
 import paramiko
 import os
 import threading
+import hashlib
 
 class Node(object):
     def __init__(self, ip='127.0.0.1', rootpath=root):
         self.ip = ip
         self.root = rootpath
-        self.incoming = self.root + 'incoming/'
-        self.store = self.root + 'store/'
+        self.incoming = self.root + 'incoming'
+        self.store = self.root + 'store'
         self.dao = NodeDAO()
 
     def scan(self, incoming=None):
@@ -30,23 +31,17 @@ class Node(object):
             incoming = self.incoming
         return subs(incoming)
 
-    def load_from_incoming(self):
-        res = True
-        archived = self.dao.fetch_new_from_db()
-        arch_d = {}
-        for a in archived:
-            arch_d[a[0]] = a[1]
-        for fullname in self.scan(self.incoming):
-            filename = fullname.replace(self.incoming, self.store)
-            if ((fullname not in arch_d) or (md5(fullname) != arch_d[filename])):
-                rtcd, _ = exec_local_cmd('rm -rf ' + filename)
-                if (0 == rtcd):
-                    rtcode, _ = exec_local_cmd('cp ' + self.incoming + filename + ' ' + self.store + filename)
-                    self.dao.save_new_to_db()
-                    res = (rtcode == 0)
-        return res
+    def load_file_info_from_incoming_to_db(self):
+        resl = []
+        for fullname in self.scan():
+            f = open(fullname, 'rb')
+            md5 = hashlib.md5(f.read()).hexdigest()
+            f.close()
+            if not self.dao.init_record_to_db(fullname, md5, os.path.getsize(fullname)):
+                resl.append(fullname)
+        return resl
 
-
+    def
 
 
 
@@ -57,7 +52,7 @@ if ('__main__' == __name__):
 #        print (l)
 #    print(len(ls))
 
-    print (node.load_from_incoming())
+    node.load_file_info_from_incoming_to_db()
 
 #    l2 = node.scan1()
 #    print(len(l2))

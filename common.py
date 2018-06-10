@@ -11,13 +11,13 @@ from config import TIMEOUT_s, SHORT_s, RETRY, SCRIPT_EXECUTE_TIMEOUT_s
 
 # status
 INVALID = -1
-NEW = 0
-READY = 1
-COPYING = 2
-ARCHIVED = 3
+INIT = 0
+NEW = 1
+READY = 2
+COPYING = 3
+ARCHIVED = 4
 # type
 FILE = 0
-
 
 def cond_to_list(conds):
 # cond: [col, comp, val]

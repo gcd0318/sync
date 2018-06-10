@@ -25,7 +25,27 @@ class DB(object):
         self.cur.execute(sql)
 
 
-    def update(self):
+    def update(self, tablename, val_dict, conds=[]):
+        sql = 'update ' + tablename + ' set ' + self.kv_to_sql(val_dict) + ' where ' + self.conds_to_sql(conds) + ';'
+        try:
+            self.execute(sql)
+        except Exception as err:
+#            print('sql error: ' + str(err))
+            logging.error('sql error: ' + str(err))
+        finally:
+            self.cur.execute('commit;')
+        tmpres = self.select(tablename, list(val_dict.keys()), conds)
+        resl = []
+        if tmpres:
+#            print(res)
+            resl = tmpres[-1]
+#        print(resl)
+        res = True
+        vlist = list(val_dict.values())
+        for v in resl:
+            res = res and (v.strip() in vlist)
+        return res
+
         pass
     def delete(self):
         pass
@@ -83,27 +103,34 @@ class DB(object):
     def get_table(self, table_name):
         return self.select(pg_tables, 'tablename', ["tablename = '" + table_name, "tableowner = '" + self.username])
 
+    def kv_to_sql(self, cond):
+        for k in cond:
+            v = cond[k]
+            if (int == type(v)):
+                v = str(v)
+            elif (str == type(v)):
+                v = "'" + v + "'"
+        return str(k) + '=' + v
+
+    def conds_to_sql(self, conds):
+        res = '1=1'
+        if(0 < len(conds)):
+            if (list != type(conds)):
+                conds = [conds]
+            for cond in conds:
+                if (str == type(cond)):
+                    res = res + ' and ' + cond
+                elif(dict == type(cond)):
+                    res = res + ' and ' + self.kv_to_sql(cond)
+        return res
+
     def select(self, table, cols, conds=[], limit=None):
 #        print (table, cols, conds, limit)
         res = None
         sql = 'select '
         if (str == type(cols)):
             cols = [cols]
-        sql = sql + ', '.join(cols) + ' from ' + table + ' where 1=1 '
-        if(0 < len(conds)):
-            if (list != type(conds)):
-                conds = [conds]
-            for cond in conds:
-                if (str == type(cond)):
-                    sql = sql + ' and ' + cond
-                elif(dict == type(cond)):
-                    for k in cond:
-                        v = cond[k]
-                        if (int == type(v)):
-                            v = str(v)
-                        elif (str == type(v)):
-                            v = "'" + v + "'"
-                        sql = sql + ' and ' + k + '=' + v
+        sql = sql + ', '.join(cols) + ' from ' + table + ' where ' + self.conds_to_sql(conds)
         if (limit is not None):
             sql = sql + ' limit ' + str(limit)
         self.execute(sql+';')
@@ -149,3 +176,4 @@ if ('__main__' == __name__):
 #    print(db.craate_table('testtable', {'col1': 'int', 'col2': 'varchar'}, False))
     print(db.insert('main', fullname='testpath1', md5='testmd5', status=999, copy_num=0, type=999, size=-1))
     print(db.insert('main', fullname='testpath2', md5='testmd5', status=999, copy_num=0, type=999, size=-1))
+    print(db.update('main', {'md5':'123'}, ["fullname='testpath1'"]))
