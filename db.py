@@ -1,4 +1,4 @@
-#import logging
+import logging
 import psycopg2
 
 class DB(object):
@@ -10,31 +10,19 @@ class DB(object):
         self.port = port
         self.conn = psycopg2.connect(database=dbname, user=username, password=password, host=host, port=port)
         self.cur = self.conn.cursor()
-        print('init db')
-#        logging.info('init')
+#        print('init db')
+        logging.info('init')
 
     def __del__(self):
         self.conn.close()
 
     def execute(self, sql):
-        print('running sql: ' + sql)
-#        logging.debug('running sql: ' + sql)
         sql = sql.strip()
         if(not(sql.endswith(';'))):
             sql = sql + ';'
-        res = None
-        try:
-            self.cur.execute(sql)
-        except Exception as err:
-            print('sql error: ' + str(err))
-#            logging.error('sql error: ' + str(err))
-        if(sql.split()[0] in ('select', 'desc')):
-            try:
-                res = self.cur.fetchall()
-            except Exception as err:
-                print(err)
-#                logging.warning(err)
-        return res
+#        print('running sql: ' + sql)
+        logging.debug('running sql: ' + sql)
+        self.cur.execute(sql)
 
 
     def update(self):
@@ -43,16 +31,28 @@ class DB(object):
         pass
     def get_all_cols(self, table):
         res = []
-        cols = self.execute('desc ' + table + ';')
-        for col in cols:
-            res.append(col[0])
+        try:
+            self.execute('desc ' + table + ';')
+            for col in self.cur.fetchall():
+                res.append(col[0])
+        except Exception as err:
+#            print('sql error: ' + str(err))
+            logging.error('sql error: ' + str(err))
+        finally:
+            self.cur.execute('commit;')
         return res
 
     def drop_table(self, table_name):
         res = (self.get_table(table_name) is None)
         if (not res):
             sql = 'drop table ' + table_name + ';'
-            self.execute(sql)
+            try:
+                self.execute(sql)
+            except Exception as err:
+#                print('sql error: ' + str(err))
+                logging.error('sql error: ' + str(err))
+            finally:
+                self.cur.execute('commit;')
         return self.get_table(table_name) is None
 
     def table_exists(self, table_name):
@@ -71,45 +71,81 @@ class DB(object):
                     sql = sql + '"' + col_name + '" ' + datatype + ','
                 sql = sql[:-1] + ')'
             sql = sql + ';'
-            self.execute(sql)
+            try:
+                self.execute(sql)
+            except Exception as err:
+#                print('sql error: ' + str(err))
+                logging.error('sql error: ' + str(err))
+            finally:
+                self.cur.execute('commit;')
         return self.table_exists(table_name)
 
     def get_table(self, table_name):
-        sql = "select tablename from pg_tables where tablename = '" + table_name + "' and tableowner = '" + self.username + "';"
-        return self.execute(sql)
+        return self.select(pg_tables, 'tablename', ["tablename = '" + table_name, "tableowner = '" + self.username])
 
-    def select(self, table, *cols, limit=None, **conds):
+    def select(self, table, cols, conds=[], limit=None):
+#        print (table, cols, conds, limit)
+        res = None
         sql = 'select '
-        for col in cols:
-            sql = sql + col + ', '
-        sql = sql[:-1] + ' from ' + table + ' where 1=1 '
+        if (str == type(cols)):
+            cols = [cols]
+        sql = sql + ', '.join(cols) + ' from ' + table + ' where 1=1 '
         if(0 < len(conds)):
-            for k in conds:
-                sql = sql + ' and ' + .join(conds)
+            if (list != type(conds)):
+                conds = [conds]
+            for cond in conds:
+                if (str == type(cond)):
+                    sql = sql + ' and ' + cond
+                elif(dict == type(cond)):
+                    for k in cond:
+                        v = cond[k]
+                        if (int == type(v)):
+                            v = str(v)
+                        elif (str == type(v)):
+                            v = "'" + v + "'"
+                        sql = sql + ' and ' + k + '=' + v
         if (limit is not None):
             sql = sql + ' limit ' + str(limit)
-        return self.execute(sql+';')
+        self.execute(sql+';')
+        try:
+            res = self.cur.fetchall()
+        except Exception as err:
+#            print(err)
+            logging.warning('sql error: ' + str(err))
+        return res
 
-    def insert(self, table, cols, valslist):
+    def insert(self, table, **vallist):
         resl = []
         res = -1
-        if(0 == len(cols)):
-            cols = self.get_all_cols(table)
         conds = []
-        sql = 'insert into ' + table + ' (' + ', '.join(cols) + ') values '
-        for vals in valslist:
-            sql = sql + ' (' + ', '.join(vals) + '),'
-            i = 0
-            while (i < len(cols)):
-                conds.append(cols[i] + '=' + vals[i])
-                i = i + 1
-        sql = sql[:-1] + ';'
-        self.execute(sql)
-        res = self.select(table, cols, conds)[-1][0]
-        resl.append(res)
-        return res, len(resl) == len(valslist)
+        cols = list(vallist.keys())
+        vals = []
+        tmpl = []
+        for col in cols:
+            v = vallist[col]
+            if (int == type(v)):
+                v = str(v)
+            elif(str == type(v)):
+                v = "'" + v + "'"
+            vals.append(v)
+        sql = 'insert into ' + table + ' (' + ', '.join(cols) + ') values ' + ' (' + ', '.join(vals) + ');'
+        try:
+            self.execute(sql)
+        except Exception as err:
+#            print('sql error: ' + str(err))
+            logging.error('sql error: ' + str(err))
+        finally:
+            self.cur.execute('commit;')
+
+        res = self.select(table, cols, vallist)
+        if res:
+#            print(res)
+            resl.append(res[-1][0])
+#        print(resl)
+        return res, 1 == len(resl)
 
 if ('__main__' == __name__):
-    db = DB('testdb', 'auto', 'auto')
-    print(db.craate_table('testtable', {'col1': 'int', 'col2': 'varchar'}, False))
-    print (db.insert('main', ['path', 'md5', 'status', 'copy_num', 'type', 'size'], {}))
+    db = DB('sync', 'sync', 'sync')
+#    print(db.craate_table('testtable', {'col1': 'int', 'col2': 'varchar'}, False))
+    print(db.insert('main', fullname='testpath1', md5='testmd5', status=999, copy_num=0, type=999, size=-1))
+    print(db.insert('main', fullname='testpath2', md5='testmd5', status=999, copy_num=0, type=999, size=-1))

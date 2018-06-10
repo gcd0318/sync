@@ -31,7 +31,7 @@ class Node(object):
         return subs(incoming)
 
     def load_from_incoming(self):
-        res = False
+        res = True
         archived = self.dao.fetch_new_from_db()
         arch_d = {}
         for a in archived:
@@ -42,8 +42,9 @@ class Node(object):
                 rtcd, _ = exec_local_cmd('rm -rf ' + filename)
                 if (0 == rtcd):
                     rtcode, _ = exec_local_cmd('cp ' + self.incoming + filename + ' ' + self.store + filename)
-                    self.dao.insert_to_db()
-        return rtcode == 0
+                    self.dao.save_new_to_db()
+                    res = (rtcode == 0)
+        return res
 
 
 
@@ -56,7 +57,7 @@ if ('__main__' == __name__):
 #        print (l)
 #    print(len(ls))
 
-    print (node.load_from_basepath())
+    print (node.load_from_incoming())
 
 #    l2 = node.scan1()
 #    print(len(l2))

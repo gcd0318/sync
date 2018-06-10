@@ -4,7 +4,7 @@ username = 'sync'
 password = 'sync'
 port = 5432
 
-root = '/mnt/sda1/'
+root = '/mnt/sda1/sync/'
 
 period = 600
 rate = 0.9
