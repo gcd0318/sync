@@ -2,17 +2,25 @@ from node_dao import NodeDAO
 from common import md5, exec_local_cmd
 from config import root
 
+from config import DEF_LIMIT
+from common import COPYING
+
 import paramiko
 import os
 import threading
 import hashlib
+import shutil
 
 class Node(object):
     def __init__(self, ip='127.0.0.1', rootpath=root):
         self.ip = ip
         self.root = rootpath
-        self.incoming = self.root + 'incoming'
-        self.store = self.root + 'store'
+        self.incoming = self.root + '/incoming'
+        if not (os.path.exists(self.incoming)):
+            os.mkdir(self.incoming)
+        self.store = self.root + '/store'
+        if not (os.path.exists(self.store)):
+            os.mkdir(self.store)
         self.dao = NodeDAO()
 
     def scan(self, incoming=None):
@@ -38,20 +46,38 @@ class Node(object):
             md5 = hashlib.md5(f.read()).hexdigest()
             f.close()
             rel_name = fullname[len(self.incoming):]
-            if not self.dao.init_record_to_db(rel_name, md5, os.path.getsize(fullname)):
+            if not self.dao.add_record_to_main(rel_name, md5, os.path.getsize(fullname)):
                 resl.append(rel_name)
         return resl
+
+    def load_local_file_to_store(self, limit=DEF_LIMIT):
+        for pair in self.dao.fetch_new_from_db(limit):
+            fullname, src_md5, size = pair
+            src_fullname = self.incoming + fullname
+            dest_fullname = self.store + fullname
+            dest_path, filename = os.path.split(dest_fullname)
+            if not os.path.exists(dest_path):
+                os.mkdir(dest_path)
+            shutil.copyfile(src_fullname, dest_fullname)
+            if (md5(dest_fullname) == src_md5):
+                self.dao.update_file_info_to_main({'status': 'status+1'}, ["fullname='"+fullname+"'"])
+                self.dao.add_file_info_to_local(fullname, src_md5, size)
+
+
+
+
 
 
 
 if ('__main__' == __name__):
-    node = Node()
+    node = Node(rootpath='/home/guochen/sync')
 #    ls = node.scan()
 #    for l in ls:
 #        print (l)
 #    print(len(ls))
 
     node.load_file_info_from_incoming_to_db()
+    node.load_local_file_to_store()
 
 #    l2 = node.scan1()
 #    print(len(l2))

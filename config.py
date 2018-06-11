@@ -4,7 +4,7 @@ username = 'sync'
 password = 'sync'
 port = 5432
 
-root = '/mnt/sda1/sync/'
+root = '/mnt/sda1/sync'
 
 period = 600
 rate = 0.9
@@ -15,3 +15,4 @@ RETRY = 3
 SCRIPT_EXECUTE_TIMEOUT_s = 1800  #30 mins
 
 DEF_COPY_NUM = 2
+DEF_LIMIT = 10

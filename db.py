@@ -43,7 +43,7 @@ class DB(object):
         res = True
         vlist = list(val_dict.values())
         for v in resl:
-            res = res and (v.strip() in vlist)
+            res = res and (str(v).strip() in vlist)
         return res
 
         pass

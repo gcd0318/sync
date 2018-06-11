@@ -11,10 +11,10 @@ class NodeDAO(object):
         self.db = DB(dbname, username, password)
 
     def fetch_new_from_db(self, limit=None):
-        return self.db.select('main', ['fullname', 'md5'], ['status='+str(NEW)], limit)
+        return self.db.select('main', ['fullname', 'md5', 'size'], ['status='+str(NEW)], limit)
 
-    def init_record_to_db(self, fullname, md5, size):
-        res = self.is_fullname_in_db(fullname)
+    def add_record_to_main(self, fullname, md5, size):
+        res = self.is_fullname_in_main(fullname)
         if not res:
             _, res = self.db.insert('main',
                                     fullname=fullname,
@@ -27,12 +27,33 @@ class NodeDAO(object):
         return res
 
 
-    def is_fullname_in_db(self, fullname):
-        res = self.db.select('main', ['fullname'], ["fullname='" + fullname + "'"])
+    def is_fullname_in_db(self, tablename, fullname):
+        res = self.db.select(tablename, ['fullname'], ["fullname='" + fullname + "'"])
         return bool(res)
 
-    def update_file_info(self, val_dict, conds=[]):
+    def is_fullname_in_main(self, fullname):
+        return self.is_fullname_in_db('main', fullname)
+
+    def is_fullname_in_local(self, fullname):
+        return self.is_fullname_in_db('local', fullname)
+
+    def update_file_info_to_main(self, val_dict, conds=[]):
         return self.db.update('main', val_dict, conds)
+
+    def update_file_info_to_local(self, val_dict, conds=[]):
+        return self.db.update('local', val_dict, conds)
+
+    def add_file_info_to_local(self, fullname, md5, size):
+        res = self.is_fullname_in_local(fullname)
+        if not res:
+            _, res = self.db.insert('local',
+                                    fullname=fullname,
+                                    md5=md5,
+                                    type=FILE,
+                                    size=str(size)
+                                    )
+        return res
+
 
 if ('__main__' == __name__):
     dao = NodeDAO()

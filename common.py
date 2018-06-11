@@ -15,7 +15,6 @@ INIT = 0
 NEW = 1
 READY = 2
 COPYING = 3
-ARCHIVED = 4
 # type
 FILE = 0
 
