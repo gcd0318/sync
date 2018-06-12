@@ -109,7 +109,10 @@ class DB(object):
             if (int == type(v)):
                 v = str(v)
             elif (str == type(v)):
-                v = "'" + v + "'"
+                if(v[0] in '+-'):
+                    v = k + v
+                else:
+                    v = "'" + v + "'"
         return str(k) + '=' + v
 
     def conds_to_sql(self, conds):

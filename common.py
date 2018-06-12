@@ -10,11 +10,9 @@ from threading import Thread
 from config import TIMEOUT_s, SHORT_s, RETRY, SCRIPT_EXECUTE_TIMEOUT_s
 
 # status
-INVALID = -1
-INIT = 0
-NEW = 1
-READY = 2
-COPYING = 3
+INVALID = -2
+INIT = -1
+NEW = 0
 # type
 FILE = 0
 

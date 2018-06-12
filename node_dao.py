@@ -2,7 +2,7 @@ from config import dbname, username, password
 from common import cond_to_list
 from db import DB
 
-from common import INVALID, INIT, NEW, READY, COPYING, ARCHIVED
+from common import INVALID, INIT, NEW
 from common import FILE
 from config import DEF_COPY_NUM
 

@@ -3,7 +3,6 @@ from common import md5, exec_local_cmd
 from config import root
 
 from config import DEF_LIMIT
-from common import COPYING
 
 import paramiko
 import os
@@ -60,17 +59,15 @@ class Node(object):
                 os.mkdir(dest_path)
             shutil.copyfile(src_fullname, dest_fullname)
             if (md5(dest_fullname) == src_md5):
-                self.dao.update_file_info_to_main({'status': 'status+1'}, ["fullname='"+fullname+"'"])
+                self.dao.update_file_info_to_main({'status': '+1'}, ["fullname='"+fullname+"'"])
                 self.dao.add_file_info_to_local(fullname, src_md5, size)
 
-
-
-
-
+    def del_
 
 
 if ('__main__' == __name__):
-    node = Node(rootpath='/home/guochen/sync')
+#    node = Node(rootpath='/home/guochen/sync')
+    node = Node()
 #    ls = node.scan()
 #    for l in ls:
 #        print (l)
