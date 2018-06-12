@@ -54,6 +54,10 @@ class NodeDAO(object):
                                     )
         return res
 
+    def fetch_finished_from_main(self):
+        return self.db.select('main', ['fullname'], ['copy_num=status'])
+
+
 
 if ('__main__' == __name__):
     dao = NodeDAO()

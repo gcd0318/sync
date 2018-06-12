@@ -62,7 +62,11 @@ class Node(object):
                 self.dao.update_file_info_to_main({'status': '+1'}, ["fullname='"+fullname+"'"])
                 self.dao.add_file_info_to_local(fullname, src_md5, size)
 
-    def del_
+    def del_copied_from_incoming(self):
+        for item in self.dao.fetch_finished_from_main():
+            del_filename = self.incoming + item[0]
+            os.remove(del_filename)
+
 
 
 if ('__main__' == __name__):
