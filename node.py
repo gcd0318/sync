@@ -68,7 +68,10 @@ class Node(object):
             del_filename = self.incoming + item[0]
             os.remove(del_filename)
             if os.path.exists(del_filename):
-                self.dao.
+                if not self.dao.del_from_db('main', ['fullname=' + item[0]]):
+                    resl.append(del_filename)
+        return resl
+
 
 
 
