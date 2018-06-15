@@ -47,8 +47,22 @@ class DB(object):
         return res
 
         pass
-    def delete(self):
-        pass
+    def delete(self, tablename, conds=[]):
+        sql = 'delete from ' + tablename + ' where ' + self.conds_to_sql(conds) + ';'
+        try:
+            self.execute(sql)
+        except Exception as err:
+            #                print('sql error: ' + str(err))
+            logging.error('sql error: ' + str(err))
+        finally:
+            self.cur.execute('commit;')
+
+        res = self.select(tablename, '*', conds)
+        resl = []
+        if res:
+            resl.append(res[-1][0])
+        return res, 0 == len(resl)
+
     def get_all_cols(self, table):
         res = []
         try:
@@ -180,3 +194,4 @@ if ('__main__' == __name__):
     print(db.insert('main', fullname='testpath1', md5='testmd5', status=999, copy_num=0, type=999, size=-1))
     print(db.insert('main', fullname='testpath2', md5='testmd5', status=999, copy_num=0, type=999, size=-1))
     print(db.update('main', {'md5':'123'}, ["fullname='testpath1'"]))
+    print(db.delete('main', ["fullname='testpath1'"]))

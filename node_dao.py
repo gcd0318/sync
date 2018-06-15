@@ -54,8 +54,14 @@ class NodeDAO(object):
                                     )
         return res
 
-    def fetch_finished_from_main(self):
+    def fetch_synced_from_main(self):
         return self.db.select('main', ['fullname'], ['copy_num=status'])
+
+    def fetch_need_sync_from_main(self):
+        return self.db.select('main', ['fullname'], ['copy_num>status'])
+
+    def del_from_db(self, tablename, conds):
+        return
 
 
 
