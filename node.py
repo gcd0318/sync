@@ -72,6 +72,10 @@ class Node(object):
                     resl.append(del_filename)
         return resl
 
+    def load_from_remote(self):
+        for ip in host_ips:
+            
+
 
 
 
