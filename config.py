@@ -1,4 +1,4 @@
-host_ips = ['192.168.29.173', '192.168.31.123']
+host_ips = ['192.168.29.173']
 dbname = 'sync'
 username = 'sync'
 password = 'sync'

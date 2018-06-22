@@ -1,6 +1,6 @@
 from node_dao import NodeDAO
 from common import md5, exec_local_cmd
-from config import root
+from config import root, host_ips
 
 from config import DEF_LIMIT
 
@@ -9,6 +9,7 @@ import os
 import threading
 import hashlib
 import shutil
+import socket
 
 class Node(object):
     def __init__(self, ip='127.0.0.1', rootpath=root):
@@ -21,6 +22,11 @@ class Node(object):
         if not (os.path.exists(self.store)):
             os.mkdir(self.store)
         self.dao = NodeDAO()
+        self.remote_daos = []
+        hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+        for ip in host_ips:
+            if not(ip in ips):
+                self.remote_daos.append(NodeDAO(ip))
 
     def scan(self, incoming=None):
         def subs(path):
@@ -73,30 +79,20 @@ class Node(object):
         return resl
 
     def load_from_remote(self):
-        for ip in host_ips:
-            
+        pass
+
 
 
 
 
 
 if ('__main__' == __name__):
-#    node = Node(rootpath='/home/guochen/sync')
-    node = Node()
-#    ls = node.scan()
-#    for l in ls:
-#        print (l)
-#    print(len(ls))
+    node = Node(rootpath='/home/guochen/sync')
+#    node = Node()
+    print(node.remote_daos)
 
-    node.load_file_info_from_incoming_to_db()
-    node.load_local_file_to_store()
-
-#    l2 = node.scan1()
-#    print(len(l2))
-#    for l in l1:
-#        if not (l in l2):
-#            print(l)
-
+#    node.load_file_info_from_incoming_to_db()
+#    node.load_local_file_to_store()
 
 
 #    def scan1(self, basepath=None):

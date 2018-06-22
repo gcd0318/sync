@@ -7,8 +7,11 @@ from common import FILE
 from config import DEF_COPY_NUM
 
 class NodeDAO(object):
-    def __init__(self):
-        self.db = DB(dbname, username, password)
+    def __init__(self, ip=None):
+        if ip:
+            self.db = DB(dbname, username, password, host=ip)
+        else:
+            self.db = DB(dbname, username, password)
 
     def fetch_new_from_db(self, limit=None):
         return self.db.select('main', ['fullname', 'md5', 'size'], ['status='+str(NEW)], limit)
@@ -67,5 +70,4 @@ class NodeDAO(object):
 
 if ('__main__' == __name__):
     dao = NodeDAO()
-    print(dao.fetch_new_from_db())
     print(dao.fetch_new_from_db())
