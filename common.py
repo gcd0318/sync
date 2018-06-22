@@ -77,7 +77,6 @@ def remote_exec(cmd, ip, username, password, port=22, no_err=True, timeout=TIMEO
             finally:
                 ssh.close()
         if (('err' in resd) and (0 < len(resd['err'])) and no_err):
-            # currently the only reason for e is zkServer.sh
             raise Exception('error on ' + ip + ': ' + str(resd['err']))
         if (not 'err' in resd):
             resd['err'] = ''

@@ -12,7 +12,7 @@ import shutil
 import socket
 
 class Node(object):
-    def __init__(self, ip='127.0.0.1', rootpath=root):
+    def __init__(self, ip='127.0.0.1', rootpath=root, hosts=[]):
         self.ip = ip
         self.root = rootpath
         self.incoming = self.root + '/incoming'
@@ -24,7 +24,7 @@ class Node(object):
         self.dao = NodeDAO()
         self.remote_daos = []
         hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
-        for ip in host_ips:
+        for ip in hosts:
             if not(ip in ips):
                 self.remote_daos.append(NodeDAO(ip))
 
@@ -43,6 +43,11 @@ class Node(object):
         if (incoming is None):
             incoming = self.incoming
         return subs(incoming)
+
+    def get_free_size(self):
+        stinfo = os.statvfs(self.root)
+        return stinfo.f_bavail * stinfo.f_bsize
+
 
     def load_file_info_from_incoming_to_db(self):
         resl = []
@@ -89,7 +94,7 @@ class Node(object):
 if ('__main__' == __name__):
     node = Node(rootpath='/home/guochen/sync')
 #    node = Node()
-    print(node.remote_daos)
+    print(node.get_free_size())
 
 #    node.load_file_info_from_incoming_to_db()
 #    node.load_local_file_to_store()
