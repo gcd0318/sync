@@ -28,7 +28,7 @@ class Node(object):
             if not(ip in ips):
                 self.remote_daos.append(NodeDAO(ip))
 
-    def scan(self, incoming=None):
+    def scan(self, path=None):
         def subs(path):
             resl = []
             for subpath in os.listdir(path):
@@ -40,9 +40,9 @@ class Node(object):
                         elif os.path.isdir(fullpath):
                             resl.extend(subs(fullpath))
             return resl
-        if (incoming is None):
-            incoming = self.incoming
-        return subs(incoming)
+        if (path is None):
+            path = self.incoming
+        return subs(path)
 
     def get_free_size(self):
         stinfo = os.statvfs(self.root)
@@ -83,21 +83,22 @@ class Node(object):
                     resl.append(del_filename)
         return resl
 
+
     def load_from_remote(self):
         pass
 
-
-
+    def get_status(self):
+        res = {}
+        res['free_size'] = self.get_free_size()
+        res['incoming_files'] = self.scan(self.incoming)
+        res['store_files'] = self.scan(self.store)
+        return res
 
 
 
 if ('__main__' == __name__):
-    node = Node(rootpath='/home/guochen/sync')
-#    node = Node()
-    print(node.get_free_size())
-
-#    node.load_file_info_from_incoming_to_db()
-#    node.load_local_file_to_store()
+    node = Node()
+    print(node.get_status())
 
 
 #    def scan1(self, basepath=None):
