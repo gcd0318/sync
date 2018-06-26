@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template
 from node import Node
+from cluster import Cluster
 import json
 
 app = Flask(__name__)
@@ -24,6 +25,15 @@ def status():
     if('GET' == request.method):
         res = json.dumps(Node().get_status())
     return res
+
+@app.route("/all_status", methods=['GET', 'POST'])
+def allstatus():
+    res = None
+    if('GET' == request.method):
+        res = json.dumps(Cluster().get_status())
+    return res
+
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8888)

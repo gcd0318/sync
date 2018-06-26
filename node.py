@@ -95,7 +95,6 @@ class Node(object):
         return res
 
 
-
 if ('__main__' == __name__):
     node = Node()
     print(node.get_status())

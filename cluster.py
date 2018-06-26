@@ -8,6 +8,12 @@ class Cluster(object):
             self.nodes.append(Node(node_ip, hosts=node_ips, rootpath='/home/guochen/sync'))
         self.timing = timing_s
 
+    def get_status(self):
+        res = {}
+        for node in self.nodes:
+            res[node.ip] = node.get_status()
+        return  res
+
 
 if ('__main__' == __name__):
     c = Cluster()
