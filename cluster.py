@@ -17,5 +17,6 @@ class Cluster(object):
 
 if ('__main__' == __name__):
     c = Cluster()
+    print(c.get_status())
     for n in c.nodes:
-        print(n.get_free_size())
+        print(n.get_status())
