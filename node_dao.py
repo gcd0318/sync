@@ -1,4 +1,4 @@
-from config import dbname, username, password
+from config import dbname, username, password, host_ips
 from common import cond_to_list
 from db import DB
 
@@ -7,11 +7,8 @@ from common import FILE
 from config import DEF_COPY_NUM
 
 class NodeDAO(object):
-    def __init__(self, ip=None):
-        if ip:
-            self.db = DB(dbname, username, password, host=ip)
-        else:
-            self.db = DB(dbname, username, password)
+    def __init__(self, ip='127.0.0.1'):
+        self.db = DB(dbname, username, password, host=ip)
 
     def fetch_new_from_db(self, limit=None):
         return self.db.select('main', ['fullname', 'md5', 'size'], ['status='+str(NEW)], limit)
@@ -66,6 +63,8 @@ class NodeDAO(object):
     def del_from_db(self, tablename, conds):
         return
 
+    def sync_db(self, remote_ip):
+        remote_db = DB(host=remote_ip)
 
 
 if ('__main__' == __name__):

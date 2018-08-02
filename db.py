@@ -1,8 +1,9 @@
 import logging
 import psycopg2
+from config import dbname, username, password
 
 class DB(object):
-    def __init__(self, dbname, username, password, host='127.0.0.1', port=5432):
+    def __init__(self, dbname=dbname, username=username, password=password, host='127.0.0.1', port=5432):
         self.dbname = dbname
         self.username = username
         self.password = password

@@ -12,7 +12,16 @@ class Cluster(object):
         res = {}
         for node in self.nodes:
             res[node.ip] = node.get_status()
-        return  res
+        return res
+
+    def transfer_from_incoming(self):
+        for node in self.nodes:
+            for filename in node.
+            node.transfor_file_to_remote()
+
+    def sync_all_db(self):
+        for node in self.nodes:
+            pass
 
 
 if ('__main__' == __name__):

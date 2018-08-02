@@ -1,5 +1,5 @@
 from node_dao import NodeDAO
-from common import md5, exec_local_cmd
+from common import md5, exec_local_cmd, remote_cp
 from config import root, host_ips
 
 from config import DEF_LIMIT
@@ -48,6 +48,11 @@ class Node(object):
         stinfo = os.statvfs(self.root)
         return stinfo.f_bavail * stinfo.f_bsize
 
+    def transfor_file_to_remote(self, filename, remote_ip, port, username, password, ):
+        res = None
+        if (self.ip != remote_ip):
+            res = remote_cp(filename, remote_ip, port, username, password, 'l2r')
+        return res
 
     def load_file_info_from_incoming_to_db(self):
         resl = []
@@ -84,8 +89,9 @@ class Node(object):
         return resl
 
 
-    def load_from_remote(self):
+    def load_from_remote(self, remote_ip):
         pass
+
 
     def get_status(self):
         res = {}
