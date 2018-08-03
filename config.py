@@ -4,6 +4,8 @@ username = 'sync'
 password = 'sync'
 port = 5432
 
+rpc_port = 7777
+
 #root = '/mnt/sda1/sync'
 root = '/home/guochen/sync'
 

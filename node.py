@@ -51,22 +51,21 @@ class Node(object):
     def transfor_file_to_remote(self, filename, remote_ip, port, username, password, ):
         res = None
         if (self.ip != remote_ip):
-            res = remote_cp(filename, remote_ip, port, username, password, 'l2r')
+            res = remote_cp(filename, remote_ip, port, username, password, direction='l2r')
         return res
 
     def load_file_info_from_incoming_to_db(self):
         resl = []
         for fullname in self.scan():
-            f = open(fullname, 'rb')
-            md5 = hashlib.md5(f.read()).hexdigest()
-            f.close()
+            with open(fullname, 'rb') as f:
+                md5 = hashlib.md5(f.read()).hexdigest()
             rel_name = fullname[len(self.incoming):]
-            if not self.dao.add_record_to_main(rel_name, md5, os.path.getsize(fullname)):
+            if not self.dao.add_file_info_to_main(rel_name, md5, os.path.getsize(fullname)):
                 resl.append(rel_name)
         return resl
 
-    def load_local_file_to_store(self, limit=DEF_LIMIT):
-        for pair in self.dao.fetch_new_from_db(limit):
+    def load_incoming_file_to_store(self, limit=DEF_LIMIT):
+        for pair in self.dao.fetch_new_from_main(limit):
             fullname, src_md5, size = pair
             src_fullname = self.incoming + fullname
             dest_fullname = self.store + fullname

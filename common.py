@@ -268,20 +268,20 @@ def remote_cp(local, ip, port, username, password, remote, direction):
     dest = None
     t = paramiko.Transport((ip, port))
     t.connect(username=username, password=password)
-    localpath = self.basepath
-    if ('/' in local):
-        localpath = localpath + local[:local.rfind('/')] + '/'
+    localpath = os.sep.join(local.split(os.sep))
+    if (os.sep in local):
+        localpath = localpath + local[:local.rfind(os.sep)] + os.sep
     try:
         if ('l2r' == direction):
-            src = localpath + local.split('/')[-1]
-            dest = remote + local.split('/')[-1]
+            src = local
+            dest = remote + local.split(os.sep)[-1]
             paramiko.SFTPClient.from_transport(t).put(src, dest)
         elif ('r2l' == direction):
             if (not os.path.exists(localpath)):
                 os.makedirs(localpath)
             src = remote
-            if (local.endswith('/')):
-                dest = localpath + remote.split('/')[-1]
+            if (local.endswith(os.sep)):
+                dest = localpath + remote.split(os.sep)[-1]
             else:
                 dest = local
             paramiko.SFTPClient.from_transport(t).get(src, dest)
